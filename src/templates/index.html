@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Price Estimator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f4f4f4;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #333333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .prediction {
+            text-align: center;
+            font-size: 18px;
+            color: #28a745;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Estimate Your Car's Price</h2>
+        <form action="/" method="post">
+            <label for="Year">Year:</label>
+            <input type="number" step="any" name="Year" required>
+
+            <label for="EngineSize">Engine Size:</label>
+            <input type="number" step="any" name="EngineSize" required>
+
+            <label for="Mileage">Mileage:</label>
+            <input type="number" step="any" name="Mileage" required>
+
+            <label for="Owner_Count">Owner Count:</label>
+            <input type="number" step="any" name="Owner_Count" required>
+
+            <input type="submit" value="Get Estimated Price">
+        </form>
+        {% if prediction != 0 %}
+            <div class="prediction">Estimated Price: ${{ prediction }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
