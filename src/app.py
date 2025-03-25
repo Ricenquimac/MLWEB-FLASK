@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 # Cargar el modelo
-model_path = '/workspace/MLWEB-FLASK/models/Price_model_flask.sav'
+model_path = '/workspaces/MLWEB-FLASK/models/Price_model_flask.sav'
 with open(model_path, 'rb') as file:
     modelo = pickle.load(file)
 
