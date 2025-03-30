@@ -1,86 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Car Price Estimator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Price Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #f4f4f4;
-            margin: 0;
-        }
-        .container {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
-        h2 {
-            text-align: center;
-            color: #333333;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555555;
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #cccccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        .prediction {
-            text-align: center;
-            font-size: 18px;
-            color: #28a745;
-            margin-top: 20px;
-        }
+        body { background-color: #f8f9fa; }
+        .container { max-width: 600px; margin-top: 50px; }
+        .result-box { display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Estimate Your Car's Price</h2>
-        <form action="/" method="post">
-            <label for="Year">Year:</label>
-            <input type="number" step="any" name="Year" required>
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Car Price Prediction</h3>
+            </div>
+            <div class="card-body">
+                <form id="predictionForm">
+                    <div class="mb-3">
+                        <label for="make" class="form-label">Vehicle Make</label>
+                        <select class="form-select" id="make" name="make" required>
+                            <option value="">Select Make</option>
+                            <option value="Chevrolet">Chevrolet</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Nissan">Nissan</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Ford">Ford</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="model" class="form-label">Vehicle Model</label>
+                        <select class="form-select" id="model" name="model" required disabled>
+                            <option value="">First select Make</option>
+                        </select>
+                    </div>
 
-            <label for="EngineSize">Engine Size:</label>
-            <input type="number" step="any" name="EngineSize" required>
+                    <div class="mb-3">
+                        <label for="year" class="form-label">Manufacturing Year</label>
+                        <select class="form-select" id="year" name="year" required>
+                            <option value="">Select Year</option>
+                            <script>
+                                // Generate years from 2020 to 2010
+                                for(let year = 2020; year >= 2010; year--) {
+                                    document.write(`<option value="${year}">${year}</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
 
-            <label for="Mileage">Mileage:</label>
-            <input type="number" step="any" name="Mileage" required>
+                    <div class="mb-3">
+                        <label for="mileage" class="form-label">Mileage</label>
+                        <input type="number" class="form-control" id="mileage" 
+                               name="mileage" min="10100" max="150000" 
+                               step="100" placeholder="Enter mileage (10100-150000)" required>
+                    </div>
 
-            <label for="Owner_Count">Owner Count:</label>
-            <input type="number" step="any" name="Owner_Count" required>
+                    <div class="mb-3">
+                        <label for="condition" class="form-label">Condition</label>
+                        <select class="form-select" id="condition" name="condition" required>
+                            <option value="">Select Condition</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                        </select>
+                    </div>
 
-            <input type="submit" value="Get Estimated Price">
-        </form>
-        {% if prediction != 0 %}
-            <div class="prediction">Estimated Price: ${{ prediction }}</div>
-        {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Predict Price</button>
+                </form>
+
+                <div id="resultBox" class="result-box alert alert-success">
+                    <h4 class="alert-heading">Prediction Result</h4>
+                    <p>Estimated Price: $<span id="predictedPrice">---</span></p>
+                </div>
+                
+                <div id="errorBox" class="result-box alert alert-danger" style="display: none;">
+                    <h4 class="alert-heading">Error</h4>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Model options configuration
+        const modelOptions = {
+            'Chevrolet': ['Silverado'],
+            'Toyota': ['Camry'],
+            'Nissan': ['Altima'],
+            'Honda': ['Civic'],
+            'Ford': ['F-150']
+        };
+
+        // Make selection handler
+        document.getElementById('make').addEventListener('change', function() {
+            const make = this.value;
+            const modelSelect = document.getElementById('model');
+            
+            if(make) {
+                modelSelect.disabled = false;
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                modelOptions[make].forEach(model => {
+                    modelSelect.innerHTML += `<option value="${model}">${model}</option>`;
+                });
+            } else {
+                modelSelect.disabled = true;
+                modelSelect.innerHTML = '<option value="">First select Make</option>';
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                Make: document.getElementById('make').value,
+                Model: document.getElementById('model').value,
+                Year: document.getElementById('year').value,
+                Mileage: document.getElementById('mileage').value,
+                Condition: document.getElementById('condition').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('errorMessage').textContent = data.error;
+                    document.getElementById('errorBox').style.display = 'block';
+                    document.getElementById('resultBox').style.display = 'none';
+                } else {
+                    document.getElementById('predictedPrice').textContent = data.Price.toLocaleString();
+                    document.getElementById('resultBox').style.display = 'block';
+                    document.getElementById('errorBox').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'An error occurred while processing your request';
+                document.getElementById('errorBox').style.display = 'block';
+                document.getElementById('resultBox').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
